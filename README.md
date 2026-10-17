@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Inventory Management System (IMS)
 
-## Getting Started
+A production-ready, mobile-first Inventory Management System built with Next.js 14+, MongoDB, NextAuth.js, and shadcn/ui.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 14+ (App Router, TypeScript)
+- Tailwind CSS + shadcn/ui (mobile-first, responsive)
+- MongoDB (Atlas or self-hosted replica set) + Mongoose 8+
+- NextAuth.js (Auth.js) with credentials provider + JWT sessions
+- Zod for validation, React Hook Form for forms
+- TanStack Table for data grids
+- @react-pdf/renderer for invoice/waybill PDF generation
+- Recharts for dashboard charts
+- date-fns, Lucide icons
+- Zustand for light client state
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setting up MongoDB replica set
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Since all multi-document transactions require a replica set, you need to run MongoDB as a single-node replica set locally with Docker.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
 
-## Learn More
+- Docker and Docker Compose installed
 
-To learn more about Next.js, take a look at the following resources:
+### Steps
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a keyfile for MongoDB authentication (optional for local dev, but recommended):
+   ```bash
+   openssl rand -base64 756 > mongo-keyfile
+   chmod 400 mongo-keyfile
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Start MongoDB:
+   ```bash
+   docker-compose up -d
+   ```
 
-## Deploy on Vercel
+3. Initialize the replica set:
+   ```bash
+   docker exec -it ims-mongodb mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]})"
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Verify the replica set is initialized:
+   ```bash
+   docker exec -it ims-mongodb mongosh --eval "rs.status()"
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Copy `.env.example` to `.env.local` and update values:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+### Using Atlas
+
+If using MongoDB Atlas, ensure your cluster is a replica set (M10+ for production, or use a free tier with transactions enabled in some cases). Use the connection string provided.
+
+## Development
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Seed the database:
+   ```bash
+   npm run seed
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser.
+# stokr
